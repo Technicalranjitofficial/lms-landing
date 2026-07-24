@@ -23,7 +23,7 @@ export default function Hero() {
   const txtY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
 
   return (
-    <section ref={ref} id="hero" className="relative min-h-[100svh] flex flex-col justify-center overflow-hidden pt-[100px] pb-[60px]">
+    <section ref={ref} id="hero" className="relative min-h-[100svh] flex flex-col justify-center overflow-hidden pt-[120px] sm:pt-[100px] pb-[40px] sm:pb-[60px]">
 
       {/* Brand glow top, subtle */}
       <div className="absolute inset-0 z-0"
@@ -58,7 +58,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.85, delay: 0.1, ease: "easeOut" }}
             className="font-display font-black leading-[0.97] tracking-[-0.05em] mb-6"
-            style={{ fontSize: "clamp(3rem,8vw,6rem)", fontFamily: "var(--font-display)" }}>
+            style={{ fontSize: "clamp(2.4rem,7vw,5.5rem)", fontFamily: "var(--font-display)" }}>
             Learn to Code.
             <br />
             <span className="text-shimmer">Get Hired.</span>
@@ -75,7 +75,7 @@ export default function Hero() {
           {/* Proof points — green checkmarks (completion/verified) */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-            className="flex flex-wrap justify-center gap-4 mb-10">
+            className="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-8 sm:mb-10">
             {proofPoints.map(p => (
               <span key={p} className="inline-flex items-center gap-1.5 text-[0.78rem] text-[var(--color-fg-muted)]">
                 <CheckCircle size={13} style={{ color: "#34d399" }} strokeWidth={2.5} className="flex-shrink-0" />
@@ -87,11 +87,11 @@ export default function Hero() {
           {/* CTAs */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.38, ease: "easeOut" }}
-            className="flex flex-wrap items-center justify-center gap-3 mb-14">
-            <a href="#courses" className="btn btn-brand text-[0.92rem] py-[13px] px-8 gap-2">
+            className="flex flex-wrap items-center justify-center gap-3 mb-10 sm:mb-14">
+            <a href="#courses" className="btn btn-brand text-[0.84rem] sm:text-[0.92rem] py-[11px] sm:py-[13px] px-6 sm:px-8 gap-2">
               Explore Courses <ArrowRight size={16} />
             </a>
-            <button className="btn btn-outline text-[0.92rem] py-[13px] px-7 gap-2.5">
+            <button className="btn btn-outline text-[0.84rem] sm:text-[0.92rem] py-[11px] sm:py-[13px] px-5 sm:px-7 gap-2.5">
               <span className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
                 style={{ background: "#22d3ee" }}>
                 <Play size={10} className="fill-white text-white ml-0.5" />

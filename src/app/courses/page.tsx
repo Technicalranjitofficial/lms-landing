@@ -376,9 +376,9 @@ export default function CoursesPage() {
             <span className="hidden sm:block w-px h-6 bg-[var(--color-border)]" />
             <span className="hidden sm:block text-[0.84rem] font-semibold text-[var(--color-fg-muted)]">All Courses</span>
           </div>
-          <div className="flex items-center gap-3">
-            <Link href="/" className="btn btn-ghost text-[0.82rem] py-2 px-4 gap-1.5">
-              <ArrowLeft size={14} /> Back to Home
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/" className="btn btn-ghost text-[0.82rem] py-2 px-3 sm:px-4 gap-1.5">
+              <ArrowLeft size={14} /> <span className="hidden sm:inline">Back to Home</span>
             </Link>
             <Link href="/#courses" className="btn btn-brand text-[0.82rem] py-[9px] px-5 hidden sm:inline-flex">
               Start Learning
@@ -501,15 +501,15 @@ export default function CoursesPage() {
             </div>
 
             {/* Right: Level + Sort */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full lg:w-auto overflow-x-auto">
               {/* Level pills */}
-              <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shrink-0">
                 {levels.map((lvl) => (
                   <button
                     key={lvl}
                     onClick={() => setActiveLevel(lvl)}
                     className={cn(
-                      "px-3 py-1.5 rounded-lg text-[0.72rem] font-semibold transition-all duration-200",
+                      "px-2.5 sm:px-3 py-1.5 rounded-lg text-[0.7rem] sm:text-[0.72rem] font-semibold transition-all duration-200 whitespace-nowrap",
                       activeLevel === lvl
                         ? "bg-[var(--color-brand-dim)] text-[var(--color-brand-light)]"
                         : "text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"

@@ -47,12 +47,13 @@ export default function Navbar() {
       >
         <div className="container flex items-center justify-between">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2.5 group" aria-label="CodePath Home">
-            <div className="w-9 h-9 rounded-xl bg-[var(--color-brand)] flex items-center justify-center shadow-lg shadow-[var(--color-brand-glow)] group-hover:scale-105 transition-transform duration-200">
-              <BookOpen size={18} className="text-white" strokeWidth={2.5} />
+          <a href="/" className="flex items-center gap-2 shrink-0 group" aria-label="CodePath Home">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[var(--color-brand)] flex items-center justify-center shadow-lg shadow-[var(--color-brand-glow)] group-hover:scale-105 transition-transform duration-200">
+              <BookOpen size={16} className="text-white sm:hidden" strokeWidth={2.5} />
+              <BookOpen size={18} className="text-white hidden sm:block" strokeWidth={2.5} />
             </div>
             <span
-              className="font-display font-800 text-[1.15rem] tracking-[-0.03em] text-[var(--color-fg)]"
+              className="font-display font-800 text-[1rem] sm:text-[1.15rem] tracking-[-0.03em] text-[var(--color-fg)] whitespace-nowrap"
               style={{ fontFamily: "var(--font-display)" }}
             >
               Code<span className="text-grad">Path</span>
@@ -85,13 +86,13 @@ export default function Navbar() {
 
             <a
               href="#courses"
-              className="hidden sm:inline-flex btn btn-ghost text-[0.84rem] py-[9px] px-4 text-[var(--color-fg-muted)]"
+              className="hidden md:inline-flex btn btn-ghost text-[0.84rem] py-[9px] px-4 text-[var(--color-fg-muted)]"
             >
               Log In
             </a>
             <a
               href="#courses"
-              className="btn btn-brand text-[0.84rem] py-[10px] px-5 hidden sm:inline-flex"
+              className="btn btn-brand text-[0.84rem] py-[10px] px-5 hidden md:inline-flex"
             >
               Start Learning
             </a>

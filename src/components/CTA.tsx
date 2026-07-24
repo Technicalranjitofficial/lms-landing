@@ -107,7 +107,7 @@ export default function CTA() {
               </div>
 
               {/* ═══ RIGHT — White side with curved left edge ═══ */}
-              <div className="relative p-8 sm:p-10 lg:p-12 lg:pl-14 bg-white lg:-ml-8 lg:rounded-l-[40px]">
+              <div className="relative p-6 sm:p-10 lg:p-12 lg:pl-14 bg-[var(--color-surface)] lg:bg-white lg:-ml-8 lg:rounded-l-[40px]">
                 {/* Subtle gradient blob */}
                 <div aria-hidden className="absolute top-[-20%] right-[-10%] w-[300px] h-[300px] rounded-full pointer-events-none"
                   style={{ background: "radial-gradient(ellipse, rgba(124,111,255,0.04), transparent 65%)", filter: "blur(50px)" }} />
@@ -120,8 +120,8 @@ export default function CTA() {
                         whileHover={{ y: -3 }}
                         transition={{ type: "spring", stiffness: 300, damping: 22 }}
                         className="p-5 flex flex-col gap-1.5 cursor-default rounded-[16px]
-                          bg-[#f8f8fc] border border-[rgba(0,0,0,0.06)]
-                          hover:border-[rgba(0,0,0,0.12)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]
+                          bg-[var(--color-surface-2)] lg:bg-[#f8f8fc] border border-[var(--color-border)] lg:border-[rgba(0,0,0,0.06)]
+                          hover:border-[var(--color-border-2)] lg:hover:border-[rgba(0,0,0,0.12)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]
                           transition-all duration-200">
                         <div className="w-8 h-8 rounded-lg flex items-center justify-center"
                           style={{ background: dim, border: `1px solid ${border}` }}>
@@ -131,21 +131,21 @@ export default function CTA() {
                           style={{ fontFamily: "var(--font-display)", color }}>
                           {value}
                         </span>
-                        <span className="text-[0.72rem] font-medium text-[#6b7280]">{label}</span>
+                        <span className="text-[0.72rem] font-medium text-[var(--color-fg-muted)] lg:text-[#6b7280]">{label}</span>
                       </motion.div>
                     ))}
                   </div>
 
                   {/* Mini testimonial */}
                   <div className="p-4 flex items-start gap-3 rounded-[16px]
-                    bg-[#f8f8fc] border border-[rgba(0,0,0,0.06)]">
+                    bg-[var(--color-surface-2)] lg:bg-[#f8f8fc] border border-[var(--color-border)] lg:border-[rgba(0,0,0,0.06)]">
                     <img
                       src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=48&h=48&fit=crop&crop=face&auto=format"
                       alt="Student review"
                       className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-[rgba(0,0,0,0.08)]"
                     />
                     <div>
-                      <p className="text-[0.8rem] text-[#4b5563] leading-relaxed">
+                      <p className="text-[0.8rem] text-[var(--color-fg-muted)] lg:text-[#4b5563] leading-relaxed">
                         &ldquo;Cracked Amazon in 4 months. Best decision I ever made.&rdquo;
                       </p>
                       <p className="text-[0.7rem] font-semibold mt-1.5 text-[#f97316]">
