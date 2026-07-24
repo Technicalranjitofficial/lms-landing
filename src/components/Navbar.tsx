@@ -115,7 +115,7 @@ export default function Navbar() {
       {/* Mobile drawer */}
       <div
         className={cn(
-          "fixed inset-0 z-[90] lg:hidden transition-all duration-300",
+          "fixed inset-0 z-[110] lg:hidden transition-all duration-300",
           open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
       >
