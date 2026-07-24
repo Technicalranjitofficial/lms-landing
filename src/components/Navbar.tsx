@@ -61,7 +61,7 @@ export default function Navbar() {
           </a>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
+          <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
             {navLinks.map((link) => (
               <a
                 key={link.label}
@@ -84,24 +84,27 @@ export default function Navbar() {
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
             </button>
 
-            <a
-              href="#courses"
-              className="hidden md:inline-flex btn btn-ghost text-[0.84rem] py-[9px] px-4 text-[var(--color-fg-muted)]"
-            >
-              Log In
-            </a>
-            <a
-              href="#courses"
-              className="btn btn-brand text-[0.84rem] py-[10px] px-5 hidden md:inline-flex"
-            >
-              Start Learning
-            </a>
+            {/* Desktop only buttons - hidden on mobile/tablet */}
+            <div className="hidden lg:flex items-center gap-2">
+              <a
+                href="#courses"
+                className="btn btn-ghost text-[0.84rem] py-[9px] px-4 text-[var(--color-fg-muted)]"
+              >
+                Log In
+              </a>
+              <a
+                href="#courses"
+                className="btn btn-brand text-[0.84rem] py-[10px] px-5"
+              >
+                Start Learning
+              </a>
+            </div>
 
-            {/* Hamburger */}
+            {/* Hamburger - visible on mobile/tablet */}
             <button
               onClick={() => setOpen(!open)}
               aria-label={open ? "Close menu" : "Open menu"}
-              className="md:hidden w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] border border-[var(--color-border)] transition-all duration-200"
+              className="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] border border-[var(--color-border)] transition-all duration-200"
             >
               {open ? <X size={18} /> : <Menu size={18} />}
             </button>
@@ -112,7 +115,7 @@ export default function Navbar() {
       {/* Mobile drawer */}
       <div
         className={cn(
-          "fixed inset-0 z-40 md:hidden transition-all duration-300",
+          "fixed inset-0 z-40 lg:hidden transition-all duration-300",
           open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
       >
