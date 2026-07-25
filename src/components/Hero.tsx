@@ -32,7 +32,7 @@ function HeroContent({ prefersReduced }: { prefersReduced: boolean }) {
       <motion.h1
         initial={h1Initial}
         animate={h1Animate}
-        transition={{ duration: 0.6, delay: 0.05, ease: "easeOut" }}
+        transition={{ duration: 0.3, delay: 0, ease: "easeOut" }}
         className="font-display font-black leading-[0.97] tracking-[-0.05em] mb-4 sm:mb-6"
         style={{ fontSize: "clamp(2rem,5.5vw,4.5rem)", fontFamily: "var(--font-display)" }}>
         Learn to Code.
@@ -43,7 +43,7 @@ function HeroContent({ prefersReduced }: { prefersReduced: boolean }) {
       {/* Sub */}
       <motion.p
         initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.12, ease: "easeOut" }}
+        transition={{ duration: 0.25, delay: 0.06, ease: "easeOut" }}
         className="text-[clamp(0.9rem,1.6vw,1.05rem)] text-[var(--color-fg-muted)] max-w-[500px] leading-relaxed mb-4 mx-auto">
         Master DSA, Full Stack Development, and placement prep through live classes,
         150+ recorded lectures, and 1-on-1 mentor support.
@@ -52,7 +52,7 @@ function HeroContent({ prefersReduced }: { prefersReduced: boolean }) {
       {/* Proof points */}
       <motion.div
         initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.18, ease: "easeOut" }}
+        transition={{ duration: 0.22, delay: 0.1, ease: "easeOut" }}
         className="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-6 sm:mb-8">
         {proofPoints.map(p => (
           <span key={p} className="inline-flex items-center gap-1.5 text-[0.78rem] text-[var(--color-fg-muted)]">
@@ -65,7 +65,7 @@ function HeroContent({ prefersReduced }: { prefersReduced: boolean }) {
       {/* CTAs */}
       <motion.div
         initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.24, ease: "easeOut" }}
+        transition={{ duration: 0.22, delay: 0.14, ease: "easeOut" }}
         className="flex flex-wrap items-center justify-center gap-3 mb-8 sm:mb-10">
         <a href="#courses" className="btn btn-brand text-[0.84rem] sm:text-[0.92rem] py-[11px] sm:py-[13px] px-6 sm:px-8 gap-2">
           Explore Courses <ArrowRight size={16} />
@@ -82,7 +82,7 @@ function HeroContent({ prefersReduced }: { prefersReduced: boolean }) {
       {/* Trust badges */}
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+        transition={{ duration: 0.25, delay: 0.18, ease: "easeOut" }}
         className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full max-w-[680px] mb-8 lg:mb-10">
         {trustBadges.map(({ icon: Icon, value, label, color, dimColor, borderColor }) => (
           <div key={label}
@@ -102,7 +102,7 @@ function HeroContent({ prefersReduced }: { prefersReduced: boolean }) {
       {/* Tech stack */}
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.38, ease: "easeOut" }}
+        transition={{ duration: 0.22, delay: 0.22, ease: "easeOut" }}
         className="flex flex-col items-center gap-3">
         <p className="text-[0.65rem] font-bold tracking-[0.2em] uppercase text-[var(--color-fg-subtle)]">
           Technologies You&apos;ll Master
@@ -122,7 +122,7 @@ function HeroContent({ prefersReduced }: { prefersReduced: boolean }) {
       {/* Floating images — desktop only (too heavy + janky on mobile) */}
       <motion.div
         initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.4, delay: 0.28, ease: "easeOut" }}
         className="mt-10 w-full max-w-[900px] mx-auto hidden sm:block">
         <div className="relative h-[240px] lg:h-[280px]">
           {/* Main center image */}
@@ -246,7 +246,7 @@ export default function Hero() {
 
       {/* Scroll indicator — desktop only */}
       <motion.div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden sm:flex flex-col items-center gap-1.5"
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }} aria-hidden>
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} aria-hidden>
         <span className="text-[0.6rem] tracking-[0.2em] uppercase text-[var(--color-fg-subtle)]">scroll</span>
         <motion.div className="w-px h-8 bg-gradient-to-b from-[var(--color-brand)] to-transparent"
           animate={prefersReduced ? {} : { scaleY: [0, 1, 0], opacity: [0, 1, 0] }}
