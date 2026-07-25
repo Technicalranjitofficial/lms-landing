@@ -329,7 +329,10 @@ function AppSidebar({ role }: { role: UserRole }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="gap-2"
-                  onClick={() => { window.location.href = "/admin/settings"; }}
+                  onClick={() => {
+                    const isStudent = role === "STUDENT";
+                    window.location.href = isStudent ? "/dashboard/settings" : "/admin/settings";
+                  }}
                 >
                   <Settings size={14} /> Settings
                 </DropdownMenuItem>

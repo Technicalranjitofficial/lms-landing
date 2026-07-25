@@ -53,6 +53,7 @@ function LoginForm() {
       const messages: Record<string, string> = {
         OAuthAccountNotLinked: "This email is already registered with a different sign-in method.",
         CredentialsSignin:     "Incorrect email or password.",
+        AccessDenied:          "Sign-in was blocked. The backend API may be unavailable — please try again.",
         default:               "Something went wrong. Please try again.",
       };
       setError(messages[errCode] ?? messages.default);
@@ -65,7 +66,16 @@ function LoginForm() {
     setLoading(true);
     const res = await signIn("credentials", { email, password, redirect: false });
     setLoading(false);
-    if (res?.error) { setError(res.error); return; }
+    if (res?.error) {
+      // NextAuth wraps thrown errors in res.error — show it directly
+      const knownErrors: Record<string, string> = {
+        OAuthAccountNotLinked: "This email is registered with a different sign-in method.",
+        CredentialsSignin:     "Incorrect email or password.",
+        AccessDenied:          "Sign-in was blocked. The backend API may be unavailable — please try again in a moment.",
+      };
+      setError(knownErrors[res.error] ?? res.error);
+      return;
+    }
 
     // Redirect based on role — fetch the session to get the role
     const session = await getSession();

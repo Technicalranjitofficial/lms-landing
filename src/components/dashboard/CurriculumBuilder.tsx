@@ -187,6 +187,9 @@ interface LessonRowProps {
 }
 
 function LessonRow({ lesson, courseId, moduleId, dragHandle, onChange, onDelete }: LessonRowProps) {
+  // Keep a ref to the latest onChange so async upload callbacks never close over a stale version
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
   // Start expanded so the video upload zone is immediately visible
   const [expanded, setExpanded]   = useState(true);
   const [linkUrl,  setLinkUrl]    = useState("");
@@ -204,7 +207,11 @@ function LessonRow({ lesson, courseId, moduleId, dragHandle, onChange, onDelete 
       try { await deleteBunnyVideo(lesson.videoId); } catch {}
     }
 
-    onChange({ _uploading: true, _uploadPct: 0, _uploadError: undefined, videoId: "" });
+    // Use onChangeRef.current for every async call so we never write into a
+    // stale module closure (the parent's updateLesson reads mod.lessons from
+    // closure; after an await, that snapshot is outdated and spreads patches
+    // onto the wrong lesson version — losing videoId and other prior patches).
+    onChangeRef.current({ _uploading: true, _uploadPct: 0, _uploadError: undefined, videoId: "" });
 
     try {
       // Server creates video + generates presigned credentials (API key stays server-side)
@@ -212,7 +219,7 @@ function LessonRow({ lesson, courseId, moduleId, dragHandle, onChange, onDelete 
         lesson.title || `Lesson ${lesson.position}`
       );
 
-      onChange({ videoId: credentials.videoId, _uploadPct: 0 });
+      onChangeRef.current({ videoId: credentials.videoId, _uploadPct: 0 });
 
       // Browser uploads directly to Bunny via tus-js-client with presigned auth
       await uploadToBunny(file, {
@@ -221,13 +228,13 @@ function LessonRow({ lesson, courseId, moduleId, dragHandle, onChange, onDelete 
         signature:  credentials.signature,
         expiration: credentials.expiration,
         title:      lesson.title || `Lesson ${lesson.position}`,
-        onProgress: (pct) => onChange({ _uploadPct: pct }),
-        onError:    (msg) => onChange({ _uploadError: msg, _uploading: false }),
+        onProgress: (pct) => onChangeRef.current({ _uploadPct: pct }),
+        onError:    (msg) => onChangeRef.current({ _uploadError: msg, _uploading: false }),
       });
 
-      onChange({ _uploading: false, _uploadPct: 100, _videoStatus: 1 });
+      onChangeRef.current({ _uploading: false, _uploadPct: 100, _videoStatus: 1 });
     } catch (err: unknown) {
-      onChange({ _uploading: false, _uploadError: (err as Error).message ?? "Upload failed" });
+      onChangeRef.current({ _uploading: false, _uploadError: (err as Error).message ?? "Upload failed" });
     }
   }
 
@@ -283,7 +290,11 @@ function LessonRow({ lesson, courseId, moduleId, dragHandle, onChange, onDelete 
     setLinkTitle("");
   }
 
-  const hasVideo = !!lesson.videoId && !lesson._uploading && lesson._uploadPct === 100;
+  // hasVideo is true when:
+  //  a) upload just completed (_uploadPct === 100), OR
+  //  b) videoId was loaded from DB (_uploadPct is undefined — transient field not persisted)
+  const hasVideo = !!lesson.videoId && !lesson._uploading &&
+    (lesson._uploadPct === 100 || lesson._uploadPct === undefined);
 
   return (
     <div className={cn(
@@ -590,9 +601,13 @@ function ModuleCard({
 }: ModuleCardProps) {
   const [lessonDrag, setLessonDrag] = useState<number | null>(null);
   const [lessonOver, setLessonOver] = useState<number | null>(null);
+  // Keep a ref to the latest mod so async lesson onChange callbacks always
+  // read current lessons and never clobber patches applied after an await.
+  const modRef = useRef(mod);
+  modRef.current = mod;
 
   function updateLesson(lessonIdx: number, patch: Partial<CourseLesson>) {
-    const next = [...mod.lessons];
+    const next = [...modRef.current.lessons];
     next[lessonIdx] = { ...next[lessonIdx], ...patch };
     onChange({ lessons: next });
   }
@@ -780,26 +795,29 @@ export interface CurriculumBuilderProps {
 export function CurriculumBuilder({ courseId, value, onChange }: CurriculumBuilderProps) {
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [overIdx, setOverIdx] = useState<number | null>(null);
+  // Always-fresh ref so updateModule never closes over a stale value snapshot
+  const valueRef = useRef(value);
+  valueRef.current = value;
 
   function addModule() {
     onChange([
-      ...value,
+      ...valueRef.current,
       {
         id: uid(), title: "", description: "",
-        position: value.length + 1,
+        position: valueRef.current.length + 1,
         lessons: [], _open: true,
       },
     ]);
   }
 
   function updateModule(idx: number, patch: Partial<CourseModule>) {
-    const next = [...value];
+    const next = [...valueRef.current];
     next[idx] = { ...next[idx], ...patch };
     onChange(next);
   }
 
   function deleteModule(idx: number) {
-    onChange(value.filter((_, i) => i !== idx).map((m, i) => ({ ...m, position: i + 1 })));
+    onChange(valueRef.current.filter((_, i) => i !== idx).map((m, i) => ({ ...m, position: i + 1 })));
   }
 
   // Module drag-to-reorder

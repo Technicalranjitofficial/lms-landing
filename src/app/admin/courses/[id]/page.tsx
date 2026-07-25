@@ -40,8 +40,9 @@ export default function EditCoursePage() {
   }, [courseId]);
 
   async function handleUpdate(payload: CoursePayload) {
-    await adminApi.put<AdminCourse>(`courses/${courseId}`, payload);
+    const course = await adminApi.put<{ id: string }>(`courses/${courseId}`, payload);
     router.push("/admin/courses");
+    return course;
   }
 
   // ── Loading ────────────────────────────────────────────────────────────────

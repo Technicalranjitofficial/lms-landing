@@ -90,6 +90,7 @@ export interface AdminCourse {
   slug: string;
   subtitle?: string;
   description: string;
+  longDescription?: string;
   category: string;
   level: string;
   price: number;
@@ -98,16 +99,40 @@ export interface AdminCourse {
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   featured: boolean;
   thumbnail?: string;
+  previewVideoId?: string;
+  accentColor?: string;
+  gradient?: string;
+  tag?: string;
   instructorId: string;
   tags: string[];
   highlights: string[];
   whatYouLearn: string[];
   prerequisites: string[];
   order: number;
-  tag?: string;
   createdAt: string;
   instructor?: { name: string; avatar?: string; instructorTitle?: string };
   _count?: { enrollments: number; reviews: number };
+  /** Populated only on the single-course GET (edit page) */
+  modules?: AdminCourseModule[];
+}
+
+export interface AdminCourseLesson {
+  id: string;
+  title: string;
+  description?: string;
+  position: number;
+  videoId?: string;
+  duration?: number;
+  isFree: boolean;
+  resources: Array<{ id: string; title: string; type: string; url: string }>;
+}
+
+export interface AdminCourseModule {
+  id: string;
+  title: string;
+  description?: string;
+  position: number;
+  lessons: AdminCourseLesson[];
 }
 
 export interface AdminUser {

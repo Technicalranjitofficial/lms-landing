@@ -16,6 +16,14 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.codepath.dev" },
       // Instructor avatars (Unsplash, etc.)
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      // DiceBear generated avatars
+      { protocol: "https", hostname: "api.dicebear.com" },
+      // Cloudflare R2 public URL pattern
+      { protocol: "https", hostname: "pub-*.r2.dev" },
+      // Generic public image CDNs
+      { protocol: "https", hostname: "*.googleusercontent.com" },
+      // Bunny Stream thumbnails
+      { protocol: "https", hostname: "*.mediadelivery.net" },
     ],
   },
   // Needed for server actions that call external APIs (Bunny, R2)

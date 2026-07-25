@@ -11,8 +11,9 @@ export default function NewCoursePage() {
   const router = useRouter();
 
   async function handleCreate(payload: CoursePayload) {
-    await adminApi.post<AdminCourse>("courses", payload);
+    const course = await adminApi.post<{ id: string }>("courses", payload);
     router.push("/admin/courses");
+    return course;
   }
 
   return (

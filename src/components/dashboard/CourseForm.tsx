@@ -12,14 +12,40 @@ import {
   Server, Smartphone, Save, RotateCcw, Tag as TagIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { AdminCourse } from "@/lib/adminApi";
 import { getThumbnailUploadUrl } from "@/lib/uploads/r2";
 import { createBunnyVideo, deleteBunnyVideo } from "@/lib/uploads/bunny";
 import { uploadToR2, uploadToBunny } from "@/hooks/useUpload";
-import { adminApi } from "@/lib/adminApi";
+import { adminApi, proxyApi, type AdminCourse } from "@/lib/adminApi";
 import { useCourseDraft, type CourseDraftData } from "@/hooks/useCourseDraft";
 import { InstructorPicker } from "@/components/dashboard/InstructorPicker";
-import { CurriculumBuilder, type CourseModule } from "@/components/dashboard/CurriculumBuilder";
+import { CurriculumBuilder, type CourseModule, type CourseLesson, type CourseResource } from "@/components/dashboard/CurriculumBuilder";
+
+// ─── Map API modules → CurriculumBuilder format ───────────────────────────────
+function apiModulesToCurriculum(modules: AdminCourse["modules"]): CourseModule[] {
+  if (!modules?.length) return [];
+  return modules.map((m) => ({
+    id:          m.id,
+    title:       m.title,
+    description: m.description ?? "",
+    position:    m.position,
+    _open:       false,
+    lessons: (m.lessons ?? []).map((l): CourseLesson => ({
+      id:          l.id,
+      title:       l.title,
+      description: l.description ?? "",
+      position:    l.position,
+      videoId:     l.videoId ?? "",
+      duration:    l.duration ?? 0,
+      isFree:      l.isFree,
+      resources:   (l.resources ?? []).map((r): CourseResource => ({
+        id:    r.id,
+        title: r.title,
+        type:  (r.type as CourseResource["type"]) ?? "OTHER",
+        url:   r.url,
+      })),
+    })),
+  }));
+}
 
 // ─── shadcn primitives ────────────────────────────────────────────────────────
 import { Button } from "@/components/ui/button";
@@ -40,14 +66,16 @@ export type CoursePayload = {
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   featured: boolean; tag: string; accentColor: string; gradient: string;
   tags: string[]; highlights: string[]; whatYouLearn: string[]; prerequisites: string[];
-  totalLectures: number; totalHours: number; modules: number; projects: number;
-  curriculum: CourseModule[];
 };
+
+// Local-only state for the stats panel — kept in component state and localStorage
+// draft only; never sent to the API (backend derives these from the curriculum).
 
 interface CourseFormProps {
   courseId?:    string;
   initialData?: Partial<AdminCourse & { curriculum?: CourseModule[] }>;
-  onSubmit:     (payload: CoursePayload) => Promise<void>;
+  /** Must return the saved course id — used to persist curriculum after save. */
+  onSubmit:     (payload: CoursePayload) => Promise<{ id: string }>;
   submitLabel?: string;
 }
 
@@ -510,6 +538,16 @@ export function CourseForm({ courseId, initialData, onSubmit, submitLabel = "Pub
     typeof window !== "undefined" ? draft.loadDraft() : null
   ).current;
 
+  // When editing an existing course, discard any stale draft that has
+  // curriculum: [] — it was written before the DB modules were loaded and
+  // would otherwise override the real data fetched from the API.
+  useEffect(() => {
+    if (courseId && savedDraft?.curriculum !== undefined) {
+      draft.clearDraft();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseId]);
+
   function r<T>(dbKey: keyof CourseDraftData, dbVal: T | undefined, fallback: T): T {
     if (courseId && d) return dbVal ?? (savedDraft?.[dbKey] as T | undefined) ?? fallback;
     const draftVal = savedDraft?.[dbKey] as T | undefined;
@@ -542,7 +580,21 @@ export function CourseForm({ courseId, initialData, onSubmit, submitLabel = "Pub
   const [totalHours,      setTotalHours]      = useState(() => r("totalHours",       (d as any)?.totalHours,       0));
   const [moduleCount,     setModuleCount]     = useState(() => r("modules",           (d as any)?.modules,          0));
   const [projects,        setProjects]        = useState(() => r("projects",          (d as any)?.projects,         0));
-  const [curriculum,      setCurriculum]      = useState<CourseModule[]>(() => r("curriculum", (d as any)?.curriculum, []));
+  const [curriculum,      setCurriculum]      = useState<CourseModule[]>(() => {
+    // Priority for edit: DB modules (mapped) → draft → empty
+    // Priority for new:  draft → empty
+    // IMPORTANT: treat empty array from DB as "no modules yet", not as "override draft"
+    const fromDb    = courseId && d ? apiModulesToCurriculum((d as any).modules) : undefined;
+    const fromDraft = savedDraft?.curriculum as CourseModule[] | undefined;
+    if (courseId && d) {
+      // DB is source of truth when editing — but only if it actually has modules
+      if (fromDb && fromDb.length > 0) return fromDb;
+      // No modules in DB yet — fall back to draft (user may have built curriculum
+      // before saving, or just saved the course record without curriculum)
+      return fromDraft ?? [];
+    }
+    return fromDraft ?? [];
+  });
 
   // Thumbnail upload
   const thumbInputRef    = useRef<HTMLInputElement>(null);
@@ -563,13 +615,19 @@ export function CourseForm({ courseId, initialData, onSubmit, submitLabel = "Pub
   const [savingDraft, setSavingDraft] = useState(false);
 
   // Auto-save snapshot
+  // When editing an existing course, omit curriculum from the draft — the DB is
+  // the source of truth. Writing an empty curriculum to the draft would cause it
+  // to override the DB data on next load (before the API response arrives).
   const buildSnapshot = useCallback((): CourseDraftData => ({
     title, subtitle, description, longDescription, category, level, duration,
     priceRupees, origRupees, thumbnail, previewVideoId, instructorId,
     status, featured, tag, accentColor, gradient,
     tags, highlights, whatYouLearn, prerequisites,
-    totalLectures, totalHours, modules: moduleCount, projects, curriculum, step,
-  }), [title, subtitle, description, longDescription, category, level, duration,
+    totalLectures, totalHours, modules: moduleCount, projects,
+    // Only persist curriculum in draft for NEW courses (no courseId yet)
+    ...(courseId ? {} : { curriculum }),
+    step,
+  }), [courseId, title, subtitle, description, longDescription, category, level, duration,
     priceRupees, origRupees, thumbnail, previewVideoId, instructorId,
     status, featured, tag, accentColor, gradient,
     tags, highlights, whatYouLearn, prerequisites,
@@ -593,6 +651,41 @@ export function CourseForm({ courseId, initialData, onSubmit, submitLabel = "Pub
   }
 
   function handleNext() { if (validateStep()) goTo(step + 1); }
+
+  /**
+   * Sync the local curriculum state to the backend.
+   * Strategy: delete all existing modules for the course (cascade deletes lessons),
+   * then re-create from the current local state. Simple and always correct.
+   */
+  async function saveCurriculum(cId: string, modules: CourseModule[]) {
+    // 1. Delete existing modules (cascade handles lessons + resources)
+    const existing = await proxyApi.get<Array<{ id: string }>>(
+      `modules/course/${cId}`
+    );
+    await Promise.all(existing.map((m) => proxyApi.del(`modules/${m.id}`)));
+
+    // 2. Re-create all modules + lessons in position order
+    for (const mod of modules) {
+      const createdMod = await proxyApi.post<{ id: string }>("modules", {
+        courseId:    cId,
+        title:       mod.title || "Untitled Module",
+        description: mod.description || "",
+        position:    mod.position,
+      });
+
+      for (const lesson of mod.lessons) {
+        await proxyApi.post("lessons", {
+          moduleId:    createdMod.id,
+          title:       lesson.title || "Untitled Lesson",
+          description: lesson.description || "",
+          position:    lesson.position,
+          videoId:     lesson.videoId || null,
+          duration:    lesson.duration || null,
+          isFree:      lesson.isFree,
+        });
+      }
+    }
+  }
 
   const handleThumbFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -621,17 +714,24 @@ export function CourseForm({ courseId, initialData, onSubmit, submitLabel = "Pub
         instructorId: instructorId.trim(), status: "DRAFT", featured,
         tag: tag.trim(), accentColor, gradient,
         tags, highlights, whatYouLearn, prerequisites,
-        totalLectures, totalHours, modules: moduleCount, projects, curriculum,
       };
+      let savedCourseId = courseId;
       if (courseId) {
         await adminApi.put(`courses/${courseId}`, payload);
-        toast.success("Draft saved");
-        draft.clearDraft();
       } else {
         const created = await adminApi.post<{ id: string }>("courses", payload);
-        draft.clearDraft();
+        savedCourseId = created.id;
+      }
+      // Sync curriculum regardless of create vs update
+      if (savedCourseId && curriculum.length > 0) {
+        await saveCurriculum(savedCourseId, curriculum);
+      }
+      draft.clearDraft();
+      if (!courseId && savedCourseId) {
         toast.success("Draft saved — redirecting…");
-        setTimeout(() => router.replace(`/admin/courses/${created.id}`), 800);
+        setTimeout(() => router.replace(`/admin/courses/${savedCourseId}`), 800);
+      } else {
+        toast.success("Draft saved");
       }
     } catch (err: unknown) {
       toast.error((err as Error).message ?? "Failed to save draft");
@@ -655,7 +755,7 @@ export function CourseForm({ courseId, initialData, onSubmit, submitLabel = "Pub
     if (!allValid) { toast.error("Fix errors in highlighted steps before publishing"); return; }
     setSaving(true);
     try {
-      await onSubmit({
+      const result = await onSubmit({
         title: title.trim(), subtitle: subtitle.trim(),
         description: description.trim(), longDescription: longDescription.trim(),
         category, level, duration: duration.trim(),
@@ -664,8 +764,12 @@ export function CourseForm({ courseId, initialData, onSubmit, submitLabel = "Pub
         instructorId: instructorId.trim(), status, featured,
         tag: tag.trim(), accentColor, gradient,
         tags, highlights, whatYouLearn, prerequisites,
-        totalLectures, totalHours, modules: moduleCount, projects, curriculum,
       });
+      // Save curriculum — use returned id for new courses, existing courseId for edits
+      const savedId = result?.id ?? courseId;
+      if (savedId && curriculum.length > 0) {
+        await saveCurriculum(savedId, curriculum);
+      }
       draft.clearDraft();
     } catch (err: unknown) {
       toast.error((err as Error).message ?? "Something went wrong");

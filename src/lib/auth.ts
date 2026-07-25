@@ -144,7 +144,11 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (err) {
           console.error("[NextAuth] Google sign-in backend call failed:", err);
-          return false; // Block sign-in — don't create orphan sessions
+          // Surface the real error message instead of a generic AccessDenied
+          const msg = err instanceof Error ? err.message : "Backend unavailable";
+          // If the API is down, throw a credentials error so NextAuth shows
+          // the error page with a descriptive message rather than AccessDenied
+          throw new Error(msg);
         }
       }
       return true;
