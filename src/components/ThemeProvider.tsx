@@ -35,7 +35,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!mounted) return;
+    // Set data-theme for our own CSS tokens
     document.documentElement.setAttribute("data-theme", theme);
+    // Also set/remove the `dark` class for shadcn's dark: utilities
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
     localStorage.setItem("lms-theme", theme);
   }, [theme, mounted]);
 

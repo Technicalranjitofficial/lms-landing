@@ -62,17 +62,17 @@ export default function Footer() {
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 mb-12 pb-10 border-b border-[rgba(255,255,255,0.1)]">
           {/* Brand */}
           <div>
-            <a href="/" className="flex items-center gap-2.5 mb-3 group w-fit" aria-label="CodePath">
+            <a href="/" className="flex items-center gap-2.5 mb-3 group w-fit" aria-label="CGS">
               <div className="w-10 h-10 rounded-xl bg-[var(--color-brand)] flex items-center justify-center shadow-lg shadow-[var(--color-brand-glow)] group-hover:scale-105 transition-transform">
                 <BookOpen size={20} className="text-white" strokeWidth={2.5} />
               </div>
-              <span className="font-display font-extrabold text-[1.25rem] tracking-[-0.03em] text-white"
-                style={{ fontFamily: "var(--font-display)" }}>
-                Code<span className="text-grad">Path</span>
-              </span>
+              <div style={{ fontFamily: "var(--font-display)" }}>
+                <span className="font-display font-extrabold text-[1.25rem] tracking-[-0.03em] text-grad">CGS</span>
+                <p className="text-[0.6rem] font-semibold text-[rgba(255,255,255,0.4)] tracking-wide -mt-0.5">CG School of Technology</p>
+              </div>
             </a>
             <p className="text-[0.88rem] text-[rgba(255,255,255,0.5)] leading-relaxed max-w-[320px]">
-              India&apos;s most structured coding education platform. Learn DSA, Full Stack, and crack placements.
+              India&apos;s most structured tech education platform. Learn software development, DSA, and crack placements.
             </p>
           </div>
 
@@ -143,7 +143,7 @@ export default function Footer() {
 
             {/* Copyright */}
             <p className="text-[0.76rem] text-[rgba(255,255,255,0.35)] flex items-center gap-1.5">
-              © 2026 CodePath. All rights reserved. Made with
+              © 2026 CG School of Technology (CGS). All rights reserved. Made with
               <Heart size={11} className="text-[#fb7185] fill-[#fb7185]" />
               in India.
             </p>

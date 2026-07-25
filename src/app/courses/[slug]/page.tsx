@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, Suspense, lazy } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   ArrowLeft, ArrowRight, BookOpen, Clock, Users, Star, Play, CheckCircle,
+  // Play is kept — used in curriculum rows
   ChevronDown, ChevronUp, Code2, Globe, Layers, Brain, Smartphone, Server,
   Settings, Monitor, Award, Shield, BarChart2, Zap, MessageCircle,
   GraduationCap, Target, FileText, Video, Download, Lock, Sparkles,
@@ -15,6 +16,12 @@ import {
 import { cn } from "@/lib/utils";
 import { publicApi, type Course as ApiCourse } from "@/lib/api";
 import Footer from "@/components/Footer";
+import BunnyVideoPlayer from "@/components/BunnyVideoPlayer";
+import { ReviewsSectionSkeleton } from "@/components/Skeleton";
+
+// Lazy-load reviews — they're below the fold and should never block
+// the curriculum, pricing card, or hero from rendering
+const ReviewsSection = lazy(() => import("@/components/ReviewsSection"));
 
 // ─── Course Data ───
 const allCourses = [
@@ -126,7 +133,7 @@ export default function CourseDetailPage() {
               <div className="w-7 h-7 rounded-md bg-[var(--color-brand)] flex items-center justify-center">
                 <BookOpen size={13} className="text-white" strokeWidth={2.5} />
               </div>
-              <span className="font-display font-extrabold text-[0.9rem] text-[var(--color-fg)] hidden sm:inline" style={{ fontFamily: "var(--font-display)" }}>Code<span className="text-grad">Path</span></span>
+              <span className="font-display font-extrabold text-[0.9rem] text-[var(--color-fg)] hidden sm:inline" style={{ fontFamily: "var(--font-display)" }}><span className="text-grad">CGS</span></span>
             </Link>
           </div>
           <div className="flex items-center gap-2">
@@ -189,17 +196,15 @@ export default function CourseDetailPage() {
           {/* Right column: enrollment card — negative margin pulls it up over the hero, sticky keeps it in view while scrolling */}
           <div className="hidden lg:block order-2 lg:-mt-[90px] lg:sticky lg:top-[76px] lg:self-start" id="enroll">
             <div className="rounded-xl border border-[var(--color-border-2)] bg-[var(--color-surface)] shadow-[0_8px_40px_rgba(0,0,0,0.5)] overflow-hidden">
-              <div className="relative h-[160px] overflow-hidden cursor-pointer group/vid">
-                <Image src={course.image} alt={course.title} fill className="object-cover" sizes="340px" />
-                <div className="absolute inset-0 bg-black/45" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg group-hover/vid:scale-110 transition-transform">
-                    <Play size={18} className="text-black fill-black ml-0.5" />
-                  </div>
-                </div>
-                <p className="absolute bottom-2.5 left-0 right-0 text-center text-[0.72rem] font-medium text-white/90">Preview this course</p>
+              {/* Preview video — Bunny Stream embed */}
+              <div className="relative">
+                <BunnyVideoPlayer
+                  thumbnail={course.image}
+                  alt={`${course.title} preview`}
+                  className="rounded-none"
+                />
                 {discount > 0 && (
-                  <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded bg-[var(--color-brand)] text-white text-[0.62rem] font-bold">{discount}% OFF</div>
+                  <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded bg-[var(--color-brand)] text-white text-[0.62rem] font-bold z-10">{discount}% OFF</div>
                 )}
               </div>
               <div className="p-4">
@@ -354,46 +359,13 @@ export default function CourseDetailPage() {
           </div>
         </div>
 
-        {/* Reviews */}
-        <div className="mb-5">
-          <h2 className="font-display font-bold text-[0.98rem] text-[var(--color-fg)] mb-2.5" style={{ fontFamily: "var(--font-display)" }}>Reviews</h2>
-          {course.rating !== "—" && (
-            <div className="flex items-center gap-4 mb-3 p-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
-              <div className="text-center">
-                <div className="font-display font-black text-[1.7rem] text-[var(--color-amber)] leading-none" style={{ fontFamily: "var(--font-display)" }}>{course.rating}</div>
-                <div className="flex gap-0.5 justify-center mt-1">{[...Array(5)].map((_, i) => <Star key={i} size={9} className="fill-current text-[var(--color-amber)]" />)}</div>
-              </div>
-              <div className="flex-1 space-y-1">
-                {[5,4,3,2,1].map(s => {
-                  const pct = s === 5 ? 78 : s === 4 ? 16 : s === 3 ? 4 : 1;
-                  return (<div key={s} className="flex items-center gap-1.5"><div className="flex-1 h-[4px] rounded-full bg-[var(--color-surface-3)]"><div className="h-full rounded-full bg-[var(--color-amber)]" style={{ width: `${pct}%` }} /></div><span className="text-[0.58rem] text-[var(--color-fg-muted)] w-4">{s}</span></div>);
-                })}
-              </div>
-            </div>
-          )}
-          {course.reviewsData.length > 0 ? (
-            <div className="grid sm:grid-cols-2 gap-2.5">
-              {course.reviewsData.map((r, i) => (
-                <div key={i} className="p-3 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)]">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div className="w-6 h-6 rounded-full bg-[var(--color-surface-3)] border border-[var(--color-border)] flex items-center justify-center text-[0.58rem] font-bold text-[var(--color-fg)]">{r.avatar}</div>
-                    <div>
-                      <p className="text-[0.72rem] font-semibold text-[var(--color-fg)]">{r.name}</p>
-                      <div className="flex items-center gap-1">{[...Array(5)].map((_, j) => <Star key={j} size={8} className={cn("fill-current", j < r.rating ? "text-[var(--color-amber)]" : "text-[var(--color-fg-subtle)]")} />)}<span className="text-[0.56rem] text-[var(--color-fg-subtle)] ml-1">{r.date}</span></div>
-                    </div>
-                  </div>
-                  {r.title && <p className="text-[0.72rem] font-semibold text-[var(--color-fg)] mb-0.5">{r.title}</p>}
-                  <p className="text-[0.68rem] text-[var(--color-fg-muted)] leading-relaxed line-clamp-2">{r.comment}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-6 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
-              <MessageCircle size={22} className="text-[var(--color-fg-subtle)] mx-auto mb-1.5" />
-              <p className="text-[0.8rem] font-semibold text-[var(--color-fg)]">No reviews yet</p>
-            </div>
-          )}
-        </div>
+        {/* Reviews — lazy loaded, never blocks above-the-fold content */}
+        <Suspense fallback={<ReviewsSectionSkeleton />}>
+          <ReviewsSection
+            rating={course.rating}
+            reviewsData={course.reviewsData}
+          />
+        </Suspense>
 
         {/* Related */}
         <div className="pb-28 lg:pb-0">

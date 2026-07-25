@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { publicApi, type Course } from "@/lib/api";
 import Footer from "@/components/Footer";
+import { CourseGridSkeleton } from "@/components/Skeleton";
 
 const categories = [
   { id: "all", label: "All Courses", icon: Sparkles, count: 10 },
@@ -445,7 +446,7 @@ export default function CoursesPage() {
               </div>
               <span className="font-display font-extrabold text-[1.15rem] tracking-[-0.03em] text-[var(--color-fg)]"
                 style={{ fontFamily: "var(--font-display)" }}>
-                Code<span className="text-grad">Path</span>
+                <span className="text-grad">CGS</span>
               </span>
             </Link>
             <span className="hidden sm:block w-px h-6 bg-[var(--color-border)]" />
@@ -628,21 +629,25 @@ export default function CoursesPage() {
             )}
           </div>
 
-          {/* Course grid */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`${activeCategory}-${activeLevel}-${sortBy}-${searchQuery}`}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
-            >
-              {filteredCourses.map((course, i) => (
-                <CoursePageCard key={course.id} course={course} index={i} />
-              ))}
-            </motion.div>
-          </AnimatePresence>
+          {/* Course grid — skeleton while API call is in-flight */}
+          {apiLoading ? (
+            <CourseGridSkeleton count={6} />
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${activeCategory}-${activeLevel}-${sortBy}-${searchQuery}`}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+              >
+                {filteredCourses.map((course, i) => (
+                  <CoursePageCard key={course.id} course={course} index={i} />
+                ))}
+              </motion.div>
+            </AnimatePresence>
+          )}
 
           {/* Empty state */}
           {filteredCourses.length === 0 && (
