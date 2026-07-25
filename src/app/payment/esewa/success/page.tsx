@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { CheckCircle, Loader2, BookOpen, ArrowRight } from "lucide-react";
+import { CheckCircle, BookOpen, ArrowRight } from "lucide-react";
 
-export default function EsewaSuccessPage() {
+function SuccessContent() {
   const params     = useSearchParams();
   const router     = useRouter();
   const orderId    = params.get("orderId") ?? "";
@@ -85,5 +85,17 @@ export default function EsewaSuccessPage() {
         </Link>
       </motion.div>
     </div>
+  );
+}
+
+export default function EsewaSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[var(--color-brand)] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -15,7 +16,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   verify_failed:      "Could not verify payment with eSewa. Contact support.",
 };
 
-export default function EsewaFailurePage() {
+function FailureContent() {
   const params = useSearchParams();
   const error  = params.get("error") ?? "cancelled";
   const msg    = ERROR_MESSAGES[error] ?? `Payment failed (${error}). Please try again.`;
@@ -60,5 +61,17 @@ export default function EsewaFailurePage() {
         </p>
       </motion.div>
     </div>
+  );
+}
+
+export default function EsewaFailurePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[var(--color-brand)] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <FailureContent />
+    </Suspense>
   );
 }
