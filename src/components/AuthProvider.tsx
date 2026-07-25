@@ -1,79 +1,111 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { userApi, type User, ApiError } from "@/lib/api";
+import { SessionProvider, useSession, signOut } from "next-auth/react";
+import { createContext, useContext, useCallback, type ReactNode } from "react";
+import type { Session } from "next-auth";
+import type { UserRole } from "@/types/next-auth";
 
-const TOKEN_KEY = "codepath_token";
-const USER_KEY = "codepath_user";
+// ─── Extended session user type ───────────────────────────────────────────────
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  image?: string | null;
+  role: UserRole;
+  provider: "credentials" | "google";
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
+  session: Session | null;
   loading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<User>;
-  register: (data: { name: string; email: string; password: string; phone?: string }) => Promise<User>;
-  logout: () => void;
+  isAdmin: boolean;
+  isSuperAdmin: boolean;
+  isInstructor: boolean;
+  isMentor: boolean;
+  isMarketing: boolean;
+  isSupport: boolean;
+  isFinance: boolean;
+  isStudent: boolean;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  session: null,
   loading: true,
   isAuthenticated: false,
-  login: async () => { throw new Error("AuthProvider not mounted"); },
-  register: async () => { throw new Error("AuthProvider not mounted"); },
-  logout: () => {},
+  isAdmin: false,
+  isSuperAdmin: false,
+  isInstructor: false,
+  isMentor: false,
+  isMarketing: false,
+  isSupport: false,
+  isFinance: false,
+  isStudent: false,
+  logout: async () => {},
 });
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+// ─── Inner consumer — reads NextAuth session ──────────────────────────────────
+function AuthContextBridge({ children }: { children: ReactNode }) {
+  const { data: session, status } = useSession();
+  const loading = status === "loading";
 
-  // Hydrate from localStorage
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(USER_KEY);
-      if (stored) {
-        setUser(JSON.parse(stored));
+  const user: AuthUser | null = session?.user
+    ? {
+        id:       (session.user as AuthUser).id       ?? "",
+        name:     session.user.name                    ?? "",
+        email:    session.user.email                   ?? "",
+        image:    session.user.image,
+        role:     (session.user as AuthUser).role      ?? "STUDENT",
+        provider: (session.user as AuthUser).provider  ?? "credentials",
       }
-    } catch {
-      localStorage.removeItem(USER_KEY);
-      localStorage.removeItem(TOKEN_KEY);
+    : null;
+
+  const logout = useCallback(async () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("codepath_token");
+      localStorage.removeItem("codepath_user");
     }
-    setLoading(false);
+    await signOut({ callbackUrl: "/" });
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const { token, user: userData } = await userApi.login({ email, password });
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(userData));
-    setUser(userData);
-    return userData;
-  }, []);
-
-  const register = useCallback(
-    async (data: { name: string; email: string; password: string; phone?: string }) => {
-      const { token, user: userData } = await userApi.register(data);
-      localStorage.setItem(TOKEN_KEY, token);
-      localStorage.setItem(USER_KEY, JSON.stringify(userData));
-      setUser(userData);
-      return userData;
-    },
-    []
-  );
-
-  const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    setUser(null);
-  }, []);
+  const role = user?.role;
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        loading,
+        isAuthenticated: !!user,
+        isSuperAdmin:  role === "SUPER_ADMIN",
+        isAdmin:       role === "SUPER_ADMIN" || role === "ADMIN",
+        isInstructor:  role === "INSTRUCTOR",
+        isMentor:      role === "MENTOR",
+        isMarketing:   role === "MARKETING",
+        isSupport:     role === "SUPPORT",
+        isFinance:     role === "FINANCE",
+        isStudent:     role === "STUDENT",
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
+// ─── Public provider — wraps NextAuth SessionProvider ────────────────────────
+export function AuthProvider({ children }: { children: ReactNode }) {
+  return (
+    <SessionProvider>
+      <AuthContextBridge>{children}</AuthContextBridge>
+    </SessionProvider>
+  );
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 export function useAuthContext() {
   return useContext(AuthContext);
 }

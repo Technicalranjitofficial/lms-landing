@@ -1,9 +1,114 @@
 @import "tailwindcss";
 
+/* ─── shadcn/ui CSS variables — dark-first (admin panel is always dark) ─── */
+:root {
+  /* Base */
+  --background:                  hsl(240 10% 4%);
+  --foreground:                  hsl(0 0% 95%);
+  --card:                        hsl(240 8% 9%);
+  --card-foreground:             hsl(0 0% 95%);
+  --popover:                     hsl(240 8% 9%);
+  --popover-foreground:          hsl(0 0% 95%);
+  --primary:                     hsl(252 100% 71%);
+  --primary-foreground:          hsl(0 0% 100%);
+  --secondary:                   hsl(240 6% 14%);
+  --secondary-foreground:        hsl(0 0% 90%);
+  --muted:                       hsl(240 6% 13%);
+  --muted-foreground:            hsl(240 5% 56%);
+  --accent:                      hsl(240 6% 16%);
+  --accent-foreground:           hsl(0 0% 95%);
+  --destructive:                 hsl(0 84% 60%);
+  --destructive-foreground:      hsl(0 0% 100%);
+  --border:                      hsl(0 0% 100% / 0.10); /* white at 10% — visible hairline */
+  --input:                       hsl(0 0% 100% / 0.10); /* input border — same as --border  */
+  --ring:                        hsl(252 100% 71%);
+  --radius:                      0.75rem;
+  /* Sidebar */
+  --sidebar:                     hsl(240 10% 6%);
+  --sidebar-foreground:          hsl(0 0% 90%);
+  --sidebar-primary:             hsl(252 100% 71%);
+  --sidebar-primary-foreground:  hsl(0 0% 100%);
+  --sidebar-accent:              hsl(240 6% 12%);
+  --sidebar-accent-foreground:   hsl(0 0% 90%);
+  --sidebar-border:              hsl(0 0% 100% / 0.07);
+  --sidebar-ring:                hsl(252 100% 71%);
+}
+
+/* ─── Light mode overrides for shadcn tokens ─── */
+/* Triggered by [data-theme="light"] AND .dark is removed           */
+/* The admin panel should stay dark — this only affects public pages */
+[data-theme="light"]:not(.dark) {
+  --background:                  hsl(0 0% 99%);
+  --foreground:                  hsl(240 10% 8%);
+  --card:                        hsl(0 0% 100%);
+  --card-foreground:             hsl(240 10% 8%);
+  --popover:                     hsl(0 0% 100%);
+  --popover-foreground:          hsl(240 10% 8%);
+  --primary:                     hsl(252 80% 58%);
+  --primary-foreground:          hsl(0 0% 100%);
+  --secondary:                   hsl(240 5% 94%);
+  --secondary-foreground:        hsl(240 10% 15%);
+  --muted:                       hsl(240 5% 94%);
+  --muted-foreground:            hsl(240 5% 45%);
+  --accent:                      hsl(240 5% 94%);
+  --accent-foreground:           hsl(240 10% 15%);
+  --destructive:                 hsl(0 84% 55%);
+  --destructive-foreground:      hsl(0 0% 100%);
+  --border:                      hsl(240 5% 88%);
+  --input:                       hsl(240 5% 88%);
+  --ring:                        hsl(252 80% 58%);
+  /* Sidebar stays dark even in light mode — admin panel is always dark */
+  --sidebar:                     hsl(240 6% 9%);
+  --sidebar-foreground:          hsl(0 0% 90%);
+  --sidebar-primary:             hsl(252 100% 71%);
+  --sidebar-primary-foreground:  hsl(0 0% 100%);
+  --sidebar-accent:              hsl(240 4% 14%);
+  --sidebar-accent-foreground:   hsl(0 0% 90%);
+  --sidebar-border:              hsl(0 0% 100% / 0.07); /* subtle white hairline */
+  --sidebar-ring:                hsl(252 100% 71%);
+}
+
 /* ─── Design Tokens ─── */
 @theme inline {
   --font-sans:    var(--font-inter);
   --font-display: var(--font-space-grotesk);
+
+  /* ── Map shadcn :root tokens → Tailwind v4 color utilities ──────────────
+     bg-background, bg-card, border-border, border-input, text-foreground
+     etc. all resolve through these mappings.                               */
+  --color-background:        var(--background);
+  --color-foreground:        var(--foreground);
+  --color-card:              var(--card);
+  --color-card-foreground:   var(--card-foreground);
+  --color-popover:           var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary:           var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary:         var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:             var(--muted);
+  --color-muted-foreground:  var(--muted-foreground);
+  --color-accent:            var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive:       var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border:            var(--border);
+  --color-input:             var(--input);
+  --color-ring:              var(--ring);
+  --color-sidebar:           var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary:   var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent:    var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border:    var(--sidebar-border);
+  --color-sidebar-ring:      var(--sidebar-ring);
+  /* Radius */
+  --radius-sm:  calc(var(--radius) - 4px);
+  --radius-md:  var(--radius);
+  --radius-lg:  calc(var(--radius) + 4px);
+  --radius-xl:  calc(var(--radius) + 8px);
+  --radius-2xl: calc(var(--radius) + 16px);
 
   /* Dark mode — true neutral dark, not blue-black */
   --color-bg:            #0a0a0a;
@@ -62,6 +167,25 @@
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   * { margin: 0; padding: 0; word-break: break-word; }
+
+  /* Sidebar container — subtle divider, not a harsh line */
+  [data-slot="sidebar-container"] {
+    border-color: hsl(0 0% 100% / 0.07) !important;
+  }
+
+  /* Sidebar header/footer internal dividers — same subtle treatment */
+  [data-slot="sidebar-header"],
+  [data-slot="sidebar-footer"] {
+    border-color: hsl(0 0% 100% / 0.07) !important;
+  }
+
+  /* Inputs — elevated background so they read as interactive fields */
+  [data-slot="input"] {
+    background-color: hsl(240 8% 9%) !important;
+  }
+  textarea {
+    background-color: hsl(240 8% 9%);
+  }
 
   html {
     scroll-behavior: smooth;
