@@ -3,6 +3,7 @@
 import { useRef, useCallback, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Clock, Users, Star, ArrowRight, Code2, Globe, Layers, Brain,
   Smartphone, Server, Settings, Monitor, Sparkles, Filter,
@@ -20,6 +21,7 @@ const categories = [
 const courses = [
   {
     id: 1,
+    slug: "sigma-dsa-full-stack",
     tag: "Most Popular",
     icon: Layers,
     title: "Sigma — DSA + Full Stack",
@@ -40,6 +42,7 @@ const courses = [
   },
   {
     id: 2,
+    slug: "alpha-plus-dsa-java-cpp",
     tag: "Beginner Friendly",
     icon: Code2,
     title: "Alpha Plus — DSA in Java/C++",
@@ -60,6 +63,7 @@ const courses = [
   },
   {
     id: 3,
+    slug: "delta-full-stack-web-dev",
     tag: "New Batch",
     icon: Globe,
     title: "Delta — Full Stack Web Dev",
@@ -80,6 +84,7 @@ const courses = [
   },
   {
     id: 4,
+    slug: "ai-machine-learning",
     tag: "Coming Soon",
     icon: Brain,
     title: "AI & Machine Learning",
@@ -100,6 +105,7 @@ const courses = [
   },
   {
     id: 5,
+    slug: "frontend-mastery-react-nextjs",
     tag: "Trending",
     icon: Monitor,
     title: "Frontend Mastery — React & Next.js",
@@ -120,6 +126,7 @@ const courses = [
   },
   {
     id: 6,
+    slug: "backend-engineering-nodejs-go",
     tag: "Advanced",
     icon: Server,
     title: "Backend Engineering — Node.js & Go",
@@ -140,6 +147,7 @@ const courses = [
   },
   {
     id: 7,
+    slug: "devops-cloud-aws-docker",
     tag: "New",
     icon: Settings,
     title: "DevOps & Cloud — AWS + Docker",
@@ -160,6 +168,7 @@ const courses = [
   },
   {
     id: 8,
+    slug: "mobile-dev-react-native",
     tag: "Hot",
     icon: Smartphone,
     title: "Mobile Dev — React Native",
@@ -180,6 +189,7 @@ const courses = [
   },
   {
     id: 9,
+    slug: "system-design-lld-hld",
     tag: "Advanced",
     icon: Layers,
     title: "System Design — LLD + HLD",
@@ -200,6 +210,7 @@ const courses = [
   },
   {
     id: 10,
+    slug: "data-science-analytics",
     tag: "New",
     icon: Brain,
     title: "Data Science & Analytics",
@@ -267,7 +278,7 @@ function CourseCard({ course, index }: { course: typeof courses[0]; index: numbe
   return (
     <SpotlightCard featured={course.featured} index={index}>
       {/* Course image with gradient overlay */}
-      <div className="relative h-[180px] sm:h-[160px] overflow-hidden rounded-t-[19px]">
+      <div className="relative h-[150px] sm:h-[140px] overflow-hidden rounded-t-[19px]">
         <Image
           src={course.image}
           alt={course.title}
@@ -280,8 +291,8 @@ function CourseCard({ course, index }: { course: typeof courses[0]; index: numbe
           "absolute inset-0 bg-gradient-to-br opacity-70 transition-opacity duration-500 group-hover:opacity-60",
           course.gradient
         )} />
-        {/* Bottom fade to card bg */}
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[var(--color-surface)] via-[var(--color-surface)]/80 to-transparent" />
+        {/* Bottom fade — always dark so image looks good in both themes */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/60 to-transparent" />
 
         {/* Floating tag */}
         <div className="absolute top-3 left-3">
@@ -309,27 +320,26 @@ function CourseCard({ course, index }: { course: typeof courses[0]; index: numbe
         </div>
       </div>
 
-      {/* Card body */}
-      <div className="flex flex-col flex-1 p-5 pt-4 bg-[var(--color-surface)]">
+      <div className="flex flex-col flex-1 p-4 pt-3 bg-[var(--color-surface)]">
         {/* Title */}
-        <h3 className="font-display font-extrabold text-[1rem] text-[var(--color-fg)] mb-0.5 leading-tight"
+        <h3 className="font-display font-extrabold text-[0.92rem] text-[var(--color-fg)] mb-0.5 leading-tight"
           style={{ fontFamily: "var(--font-display)" }}>
           {course.title}
         </h3>
-        <p className="text-[0.72rem] font-semibold mb-3" style={{ color: course.accentColor }}>
+        <p className="text-[0.68rem] font-semibold mb-2.5" style={{ color: course.accentColor }}>
           {course.subtitle}
         </p>
 
         {/* Description */}
-        <p className="text-[0.8rem] text-[var(--color-fg-muted)] leading-relaxed mb-4 flex-1 line-clamp-3">
+        <p className="text-[0.75rem] text-[var(--color-fg-muted)] leading-relaxed mb-3 flex-1 line-clamp-2">
           {course.description}
         </p>
 
         {/* Highlights */}
-        <ul className="flex flex-col gap-1.5 mb-4">
-          {course.highlights.slice(0, 4).map((h) => (
-            <li key={h} className="flex items-center gap-2 text-[0.74rem] text-[var(--color-fg-muted)]">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+        <ul className="flex flex-col gap-1 mb-3">
+          {course.highlights.slice(0, 3).map((h) => (
+            <li key={h} className="flex items-center gap-1.5 text-[0.7rem] text-[var(--color-fg-muted)]">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"
                 className="flex-shrink-0" style={{ color: course.accentColor }}>
                 <circle cx="6" cy="6" r="5.5" stroke="currentColor" strokeOpacity="0.3" />
                 <path d="M3.5 6L5 7.5L8.5 4" stroke="currentColor" strokeWidth="1.5"
@@ -341,36 +351,36 @@ function CourseCard({ course, index }: { course: typeof courses[0]; index: numbe
         </ul>
 
         {/* Meta row */}
-        <div className="flex items-center gap-3 text-[0.7rem] text-[var(--color-fg-subtle)] mb-4 flex-wrap">
-          <span className="flex items-center gap-1"><Clock size={11} /> {course.duration}</span>
-          <span className="flex items-center gap-1"><Users size={11} /> {course.students}</span>
+        <div className="flex items-center gap-2.5 text-[0.67rem] text-[var(--color-fg-subtle)] mb-3 flex-wrap">
+          <span className="flex items-center gap-1"><Clock size={10} /> {course.duration}</span>
+          <span className="flex items-center gap-1"><Users size={10} /> {course.students}</span>
           {course.rating !== "—" && (
             <span className="flex items-center gap-1 text-[var(--color-amber)]">
-              <Star size={11} className="fill-current" /> {course.rating}
+              <Star size={10} className="fill-current" /> {course.rating}
             </span>
           )}
         </div>
 
         {/* Price section */}
-        <div className="pt-4 border-t border-[var(--color-border)] mt-auto">
-          <div className="flex items-baseline gap-2 mb-3">
-            <span className="font-display font-extrabold text-[1.2rem] text-[var(--color-fg)]"
+        <div className="pt-3 border-t border-[var(--color-border)] mt-auto">
+          <div className="flex items-baseline gap-2 mb-2.5">
+            <span className="font-display font-extrabold text-[1.05rem] text-[var(--color-fg)]"
               style={{ fontFamily: "var(--font-display)" }}>{course.price}</span>
-            <span className="text-[0.75rem] text-[var(--color-fg-subtle)] line-through">{course.originalPrice}</span>
+            <span className="text-[0.7rem] text-[var(--color-fg-subtle)] line-through">{course.originalPrice}</span>
             {discount > 0 && (
-              <span className="ml-auto text-[0.66rem] font-bold px-2 py-0.5 rounded-md
+              <span className="ml-auto text-[0.6rem] font-bold px-1.5 py-0.5 rounded-md
                 bg-[var(--color-brand-dim)] text-[var(--color-brand)] border border-[var(--color-border-brand)]">
                 {discount}% off
               </span>
             )}
           </div>
-          <a href="#"
+          <Link href={`/courses/${course.slug}`}
             className={cn(
-              "w-full flex items-center justify-center gap-2 py-[10px] rounded-xl text-[0.82rem] font-semibold transition-all duration-200",
+              "w-full flex items-center justify-center gap-2 py-[9px] rounded-xl text-[0.78rem] font-semibold transition-all duration-200",
               course.featured ? "btn btn-brand" : "btn btn-outline"
             )}>
-            {course.tag === "Coming Soon" ? "Join Waitlist" : "Enroll Now"} <ArrowRight size={14} />
-          </a>
+            {course.tag === "Coming Soon" ? "Join Waitlist" : "View Course"} <ArrowRight size={13} />
+          </Link>
         </div>
       </div>
     </SpotlightCard>
@@ -455,7 +465,7 @@ export default function Courses() {
                 shadow-[0_16px_60px_rgba(0,0,0,0.3)]">
                 <div className="grid md:grid-cols-[1.1fr_1fr] gap-0">
                   {/* Image side */}
-                  <div className="relative h-[220px] md:h-full min-h-[280px] overflow-hidden">
+                  <div className="relative h-[180px] md:h-full min-h-[240px] overflow-hidden">
                     <Image
                       src={courses[0].image}
                       alt={courses[0].title}
@@ -482,7 +492,7 @@ export default function Courses() {
                   </div>
 
                   {/* Content side */}
-                  <div className="p-6 sm:p-8 flex flex-col justify-center">
+                  <div className="p-5 sm:p-6 flex flex-col justify-center">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-9 h-9 rounded-lg bg-[var(--color-brand-dim)] border border-[var(--color-border-brand)] flex items-center justify-center">
                         <Layers size={16} className="text-[var(--color-brand)]" />
@@ -492,12 +502,12 @@ export default function Courses() {
                       </div>
                     </div>
 
-                    <h3 className="font-display font-black text-[clamp(1.4rem,3vw,1.8rem)] text-[var(--color-fg)] tracking-tight mb-1"
+                    <h3 className="font-display font-black text-[clamp(1.2rem,2.5vw,1.6rem)] text-[var(--color-fg)] tracking-tight mb-1"
                       style={{ fontFamily: "var(--font-display)" }}>
                       {courses[0].title}
                     </h3>
                     <p className="text-[0.82rem] font-semibold text-[var(--color-brand)] mb-3">{courses[0].subtitle}</p>
-                    <p className="text-[0.88rem] text-[var(--color-fg-muted)] leading-relaxed mb-5 max-w-[420px]">
+                    <p className="text-[0.82rem] text-[var(--color-fg-muted)] leading-relaxed mb-4 max-w-[420px]">
                       {courses[0].description}
                     </p>
 
@@ -512,7 +522,7 @@ export default function Courses() {
                     </div>
 
                     {/* Stats row */}
-                    <div className="flex items-center gap-4 text-[0.78rem] text-[var(--color-fg-muted)] mb-6 flex-wrap">
+                    <div className="flex items-center gap-3.5 text-[0.74rem] text-[var(--color-fg-muted)] mb-4 flex-wrap">
                       <span className="flex items-center gap-1.5"><Clock size={13} /> {courses[0].duration}</span>
                       <span className="flex items-center gap-1.5"><Users size={13} /> {courses[0].students}</span>
                       <span className="flex items-center gap-1.5 text-[var(--color-amber)]">
@@ -523,16 +533,16 @@ export default function Courses() {
                     {/* Price + CTA */}
                     <div className="flex flex-wrap items-center gap-4">
                       <div className="flex items-baseline gap-2">
-                        <span className="font-display font-black text-[1.6rem] text-[var(--color-fg)]"
+                      <span className="font-display font-black text-[1.4rem] text-[var(--color-fg)]"
                           style={{ fontFamily: "var(--font-display)" }}>{courses[0].price}</span>
                         <span className="text-[0.82rem] text-[var(--color-fg-subtle)] line-through">{courses[0].originalPrice}</span>
                         <span className="text-[0.7rem] font-bold px-2 py-0.5 rounded-md bg-[var(--color-brand-dim)] text-[var(--color-brand)] border border-[var(--color-border-brand)]">
                           40% off
                         </span>
                       </div>
-                      <a href="#" className="btn btn-brand py-[12px] px-7 text-[0.88rem]">
-                        Enroll Now <ArrowRight size={15} />
-                      </a>
+                      <Link href={`/courses/${courses[0].slug}`} className="btn btn-brand py-[11px] px-6 text-[0.86rem]">
+                        View Course <ArrowRight size={14} />
+                      </Link>
                     </div>
                   </div>
                 </div>

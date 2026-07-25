@@ -46,7 +46,7 @@ export default function Testimonials() {
       <div className="container">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, ease: "easeOut" }} className="text-center mb-14">
+          transition={{ duration: 0.7, ease: "easeOut" }} className="text-center mb-10">
           <span className="section-label justify-center">
             <span className="w-5 h-px bg-[var(--color-brand)]" />
             Student Reviews
@@ -74,7 +74,7 @@ export default function Testimonials() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.65, delay: i * 0.08, ease: "easeOut" }}
               whileHover={{ y: -5, transition: { type: "spring", stiffness: 300, damping: 24 } }}
-              className="card flex flex-col gap-4 p-6">
+              className="card flex flex-col gap-3 p-5">
 
               {/* Purple quote — brand */}
               <Quote size={24} className="opacity-30" style={{ color: "#7c6fff" }} />
@@ -86,7 +86,7 @@ export default function Testimonials() {
                 ))}
               </div>
 
-              <p className="text-[0.87rem] text-[var(--color-fg-muted)] leading-[1.8] flex-1">
+              <p className="text-[0.8rem] text-[var(--color-fg-muted)] leading-[1.75] flex-1">
                 &ldquo;{t.text}&rdquo;
               </p>
 

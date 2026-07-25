@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
+import { publicApi, type Course } from "@/lib/api";
+import Footer from "@/components/Footer";
 
 const categories = [
   { id: "all", label: "All Courses", icon: Sparkles, count: 10 },
@@ -25,6 +27,7 @@ const levels = ["All Levels", "Beginner", "Intermediate", "Advanced"];
 const courses = [
   {
     id: 1,
+    slug: "sigma-dsa-full-stack",
     tag: "Most Popular",
     icon: Layers,
     title: "Sigma — DSA + Full Stack",
@@ -49,6 +52,7 @@ const courses = [
   },
   {
     id: 2,
+    slug: "alpha-plus-dsa-java-cpp",
     tag: "Beginner Friendly",
     icon: Code2,
     title: "Alpha Plus — DSA in Java/C++",
@@ -73,6 +77,7 @@ const courses = [
   },
   {
     id: 3,
+    slug: "delta-full-stack-web-dev",
     tag: "New Batch",
     icon: Globe,
     title: "Delta — Full Stack Web Dev",
@@ -97,6 +102,7 @@ const courses = [
   },
   {
     id: 4,
+    slug: "ai-machine-learning",
     tag: "Coming Soon",
     icon: Brain,
     title: "AI & Machine Learning",
@@ -121,6 +127,7 @@ const courses = [
   },
   {
     id: 5,
+    slug: "frontend-mastery-react-nextjs",
     tag: "Trending",
     icon: Monitor,
     title: "Frontend Mastery — React & Next.js",
@@ -145,6 +152,7 @@ const courses = [
   },
   {
     id: 6,
+    slug: "backend-engineering-nodejs-go",
     tag: "Advanced",
     icon: Server,
     title: "Backend Engineering — Node.js & Go",
@@ -169,6 +177,7 @@ const courses = [
   },
   {
     id: 7,
+    slug: "devops-cloud-aws-docker",
     tag: "New",
     icon: Settings,
     title: "DevOps & Cloud — AWS + Docker",
@@ -193,6 +202,7 @@ const courses = [
   },
   {
     id: 8,
+    slug: "mobile-dev-react-native",
     tag: "Hot",
     icon: Smartphone,
     title: "Mobile Dev — React Native",
@@ -217,6 +227,7 @@ const courses = [
   },
   {
     id: 9,
+    slug: "system-design-lld-hld",
     tag: "Advanced",
     icon: Layers,
     title: "System Design — LLD + HLD",
@@ -241,6 +252,7 @@ const courses = [
   },
   {
     id: 10,
+    slug: "data-science-analytics",
     tag: "New",
     icon: Brain,
     title: "Data Science & Analytics",
@@ -264,6 +276,17 @@ const courses = [
     instructor: "Aman Dhattarwal",
   },
 ];
+
+// Map category string to icon component
+function getIconForCategory(category: string) {
+  switch (category) {
+    case "development": return Code2;
+    case "data": return Brain;
+    case "devops": return Server;
+    case "mobile": return Smartphone;
+    default: return Layers;
+  }
+}
 
 function SpotlightCard({ children, index }: { children: React.ReactNode; index: number }) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -303,11 +326,63 @@ export default function CoursesPage() {
   const [activeLevel, setActiveLevel] = useState("All Levels");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"popular" | "price-low" | "price-high" | "rating">("popular");
+  const [apiCourses, setApiCourses] = useState<Course[] | null>(null);
+  const [apiLoading, setApiLoading] = useState(true);
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
 
+  // Fetch courses from API, fall back to static data on failure
+  useEffect(() => {
+    let cancelled = false;
+    publicApi
+      .getCourses()
+      .then((data) => {
+        if (!cancelled && data.length > 0) setApiCourses(data);
+      })
+      .catch(() => {
+        // API unavailable — use static fallback silently
+      })
+      .finally(() => {
+        if (!cancelled) setApiLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Merge: use API data if available, otherwise static
+  const coursesSource = useMemo(() => {
+    if (apiCourses && apiCourses.length > 0) {
+      // Map API courses to match the card component shape
+      return apiCourses.map((c) => ({
+        id: c.id as any,
+        slug: c.slug,
+        tag: c.tag || "",
+        icon: getIconForCategory(c.category),
+        title: c.title,
+        subtitle: c.subtitle || "",
+        description: c.description,
+        duration: c.duration,
+        students: c.studentsEnrolled > 0 ? `${c.studentsEnrolled.toLocaleString()}+` : "New",
+        rating: c.averageRating > 0 ? c.averageRating.toFixed(1) : "—",
+        reviews: c.totalReviews > 0 ? `${c.totalReviews.toLocaleString()}+` : "—",
+        price: `₹${c.price.toLocaleString()}`,
+        originalPrice: c.originalPrice ? `₹${c.originalPrice.toLocaleString()}` : undefined,
+        highlights: c.highlights,
+        featured: c.featured,
+        category: ["all", c.category],
+        level: c.level,
+        image: c.thumbnail || "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=450&fit=crop&auto=format&q=80",
+        gradient: c.gradient || "from-indigo-600/80 to-purple-700/90",
+        accentColor: c.accentColor || "#7c6fff",
+        modules: c.totalModules,
+        projects: c.totalProjects,
+        instructor: c.instructor,
+      })) as typeof courses;
+    }
+    return courses; // static fallback
+  }, [apiCourses]);
+
   const filteredCourses = useMemo(() => {
-    let result = courses;
+    let result = coursesSource;
 
     // Category filter
     if (activeCategory !== "all") {
@@ -356,7 +431,7 @@ export default function CoursesPage() {
     }
 
     return result;
-  }, [activeCategory, activeLevel, searchQuery, sortBy]);
+  }, [activeCategory, activeLevel, searchQuery, sortBy, coursesSource]);
 
   return (
     <div className="page-wrap mesh-bg noise-overlay min-h-screen">
@@ -410,7 +485,7 @@ export default function CoursesPage() {
               Level Up Your{" "}
               <span className="text-grad">Tech Career</span>
             </h1>
-            <p className="text-[clamp(0.95rem,1.5vw,1.1rem)] text-[var(--color-fg-muted)] leading-relaxed mb-8">
+            <p className="text-[clamp(0.88rem,1.4vw,1rem)] text-[var(--color-fg-muted)] leading-relaxed mb-6">
               10 industry-leading courses. 1,20,000+ students. From absolute beginner to placement-ready in months.
             </p>
 
@@ -501,7 +576,7 @@ export default function CoursesPage() {
             </div>
 
             {/* Right: Level + Sort */}
-            <div className="flex items-center gap-2 w-full lg:w-auto overflow-x-auto">
+            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
               {/* Level pills */}
               <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shrink-0">
                 {levels.map((lvl) => (
@@ -561,7 +636,7 @@ export default function CoursesPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
             >
               {filteredCourses.map((course, i) => (
                 <CoursePageCard key={course.id} course={course} index={i} />
@@ -598,26 +673,24 @@ export default function CoursesPage() {
       <section className="pb-20">
         <div className="container">
           <div className="shimmer-border">
-            <div className="relative overflow-hidden rounded-[23px] bg-[var(--color-surface)] border border-[var(--color-border-brand)] p-8 sm:p-12">
-              {/* Background glow */}
+            <div className="relative overflow-hidden rounded-[18px] bg-[var(--color-surface)] border border-[var(--color-border-brand)] px-6 py-5 sm:px-8 sm:py-6">
               <div className="absolute inset-0 pointer-events-none"
                 style={{ background: "radial-gradient(ellipse 60% 60% at 30% 50%, rgba(124,111,255,0.06), transparent 65%)" }} />
-
-              <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="font-display font-bold text-[clamp(1.3rem,2.5vw,1.6rem)] text-[var(--color-fg)] mb-2"
+                  <h3 className="font-display font-bold text-[1rem] sm:text-[1.15rem] text-[var(--color-fg)] mb-1"
                     style={{ fontFamily: "var(--font-display)" }}>
                     Not sure which course is right for you?
                   </h3>
-                  <p className="text-[0.9rem] text-[var(--color-fg-muted)] max-w-[440px]">
-                    Book a free 1-on-1 counseling call. Our team will help you pick the perfect track based on your goals and experience.
+                  <p className="text-[0.78rem] text-[var(--color-fg-muted)] max-w-[420px]">
+                    Book a free 1-on-1 counseling call. We&apos;ll help you pick the perfect track for your goals.
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  <a href="/#courses" className="btn btn-brand py-[12px] px-7 text-[0.88rem]">
-                    Book Free Call <ArrowRight size={15} />
+                <div className="flex flex-wrap gap-2.5 shrink-0">
+                  <a href="/#courses" className="btn btn-brand py-2 px-5 text-[0.8rem]">
+                    Book Free Call <ArrowRight size={13} />
                   </a>
-                  <a href="/" className="btn btn-outline py-[12px] px-6 text-[0.88rem]">
+                  <a href="/" className="btn btn-outline py-2 px-4 text-[0.8rem]">
                     Take Career Quiz
                   </a>
                 </div>
@@ -627,20 +700,8 @@ export default function CoursesPage() {
         </div>
       </section>
 
-      {/* Simple footer */}
-      <footer className="border-t border-[var(--color-border)] py-8">
-        <div className="container flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[0.78rem] text-[var(--color-fg-subtle)]">
-            © 2026 CodePath. All rights reserved.
-          </p>
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-[0.78rem] text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition-colors">Home</Link>
-            <Link href="/#placements" className="text-[0.78rem] text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition-colors">Placements</Link>
-            <Link href="/#testimonials" className="text-[0.78rem] text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition-colors">Reviews</Link>
-            <Link href="/#faq" className="text-[0.78rem] text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition-colors">FAQ</Link>
-          </div>
-        </div>
-      </footer>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
@@ -654,7 +715,7 @@ function CoursePageCard({ course, index }: { course: typeof courses[0]; index: n
   return (
     <SpotlightCard index={index}>
       {/* Image section */}
-      <div className="relative h-[200px] overflow-hidden rounded-t-[19px]">
+      <div className="relative h-[155px] overflow-hidden rounded-t-[19px]">
         <Image
           src={course.image}
           alt={course.title}
@@ -662,13 +723,12 @@ function CoursePageCard({ course, index }: { course: typeof courses[0]; index: n
           className="object-cover transition-transform duration-700 group-hover:scale-110"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
-        {/* Gradient overlay */}
         <div className={cn(
           "absolute inset-0 bg-gradient-to-br opacity-65 transition-opacity duration-500 group-hover:opacity-50",
           course.gradient
         )} />
-        {/* Bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[var(--color-surface)] via-[var(--color-surface)]/80 to-transparent" />
+        {/* Bottom fade — always dark to look good in both light and dark mode */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/60 to-transparent" />
 
         {/* Tag */}
         <div className="absolute top-3 left-3 flex items-center gap-2">
@@ -712,91 +772,88 @@ function CoursePageCard({ course, index }: { course: typeof courses[0]; index: n
       </div>
 
       {/* Card body */}
-      <div className="flex flex-col flex-1 p-5 pt-4 bg-[var(--color-surface)]">
-        {/* Title + subtitle */}
-        <h3 className="font-display font-extrabold text-[1.02rem] text-[var(--color-fg)] mb-0.5 leading-tight"
+      <div className="flex flex-col flex-1 p-4 pt-3 bg-[var(--color-surface)]">
+        <h3 className="font-display font-extrabold text-[0.92rem] text-[var(--color-fg)] mb-0.5 leading-tight"
           style={{ fontFamily: "var(--font-display)" }}>
           {course.title}
         </h3>
-        <p className="text-[0.72rem] font-semibold mb-2" style={{ color: course.accentColor }}>
+        <p className="text-[0.68rem] font-semibold mb-2" style={{ color: course.accentColor }}>
           {course.subtitle}
         </p>
 
         {/* Instructor */}
-        <p className="text-[0.7rem] text-[var(--color-fg-subtle)] mb-3 flex items-center gap-1.5">
-          <span className="w-4 h-4 rounded-full bg-[var(--color-surface-3)] flex items-center justify-center">
-            <Users size={8} className="text-[var(--color-fg-muted)]" />
-          </span>
+        <p className="text-[0.66rem] text-[var(--color-fg-subtle)] mb-2.5 flex items-center gap-1">
+          <Users size={8} className="text-[var(--color-fg-muted)]" />
           by {course.instructor}
         </p>
 
         {/* Description */}
-        <p className="text-[0.8rem] text-[var(--color-fg-muted)] leading-relaxed mb-4 flex-1 line-clamp-2">
+        <p className="text-[0.76rem] text-[var(--color-fg-muted)] leading-relaxed mb-3 flex-1 line-clamp-2">
           {course.description}
         </p>
 
         {/* Quick stats */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          <div className="flex flex-col items-center p-2 rounded-lg bg-[var(--color-surface-2)] border border-[var(--color-border)]">
-            <span className="text-[0.78rem] font-bold text-[var(--color-fg)]">{course.modules}</span>
-            <span className="text-[0.6rem] text-[var(--color-fg-subtle)]">Modules</span>
+        <div className="grid grid-cols-3 gap-1.5 mb-3">
+          <div className="flex flex-col items-center p-1.5 rounded-lg bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+            <span className="text-[0.72rem] font-bold text-[var(--color-fg)]">{course.modules}</span>
+            <span className="text-[0.57rem] text-[var(--color-fg-subtle)]">Modules</span>
           </div>
-          <div className="flex flex-col items-center p-2 rounded-lg bg-[var(--color-surface-2)] border border-[var(--color-border)]">
-            <span className="text-[0.78rem] font-bold text-[var(--color-fg)]">{course.projects}</span>
-            <span className="text-[0.6rem] text-[var(--color-fg-subtle)]">Projects</span>
+          <div className="flex flex-col items-center p-1.5 rounded-lg bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+            <span className="text-[0.72rem] font-bold text-[var(--color-fg)]">{course.projects}</span>
+            <span className="text-[0.57rem] text-[var(--color-fg-subtle)]">Projects</span>
           </div>
-          <div className="flex flex-col items-center p-2 rounded-lg bg-[var(--color-surface-2)] border border-[var(--color-border)]">
-            <span className="text-[0.78rem] font-bold text-[var(--color-fg)]">{course.duration}</span>
-            <span className="text-[0.6rem] text-[var(--color-fg-subtle)]">Duration</span>
+          <div className="flex flex-col items-center p-1.5 rounded-lg bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+            <span className="text-[0.72rem] font-bold text-[var(--color-fg)]">{course.duration}</span>
+            <span className="text-[0.57rem] text-[var(--color-fg-subtle)]">Duration</span>
           </div>
         </div>
 
         {/* Highlights */}
-        <ul className="flex flex-col gap-1.5 mb-4">
+        <ul className="flex flex-col gap-1 mb-3">
           {course.highlights.slice(0, 3).map((h) => (
-            <li key={h} className="flex items-center gap-2 text-[0.74rem] text-[var(--color-fg-muted)]">
-              <CheckCircle size={12} className="flex-shrink-0" style={{ color: course.accentColor }} />
+            <li key={h} className="flex items-center gap-1.5 text-[0.7rem] text-[var(--color-fg-muted)]">
+              <CheckCircle size={11} className="flex-shrink-0" style={{ color: course.accentColor }} />
               {h}
             </li>
           ))}
         </ul>
 
         {/* Meta row */}
-        <div className="flex items-center gap-3 text-[0.7rem] text-[var(--color-fg-subtle)] mb-4 flex-wrap">
-          <span className="flex items-center gap-1"><Users size={11} /> {course.students}</span>
+        <div className="flex items-center gap-2.5 text-[0.67rem] text-[var(--color-fg-subtle)] mb-3 flex-wrap">
+          <span className="flex items-center gap-1"><Users size={10} /> {course.students}</span>
           {course.rating !== "—" && (
             <span className="flex items-center gap-1 text-[var(--color-amber)]">
-              <Star size={11} className="fill-current" /> {course.rating}
+              <Star size={10} className="fill-current" /> {course.rating}
               <span className="text-[var(--color-fg-subtle)]">({course.reviews})</span>
             </span>
           )}
         </div>
 
         {/* Price + CTA */}
-        <div className="pt-4 border-t border-[var(--color-border)] mt-auto">
-          <div className="flex items-baseline gap-2 mb-3">
-            <span className="font-display font-extrabold text-[1.25rem] text-[var(--color-fg)]"
+        <div className="pt-3 border-t border-[var(--color-border)] mt-auto">
+          <div className="flex items-baseline gap-2 mb-2.5">
+            <span className="font-display font-extrabold text-[1.05rem] text-[var(--color-fg)]"
               style={{ fontFamily: "var(--font-display)" }}>{course.price}</span>
-            <span className="text-[0.75rem] text-[var(--color-fg-subtle)] line-through">{course.originalPrice}</span>
+            <span className="text-[0.7rem] text-[var(--color-fg-subtle)] line-through">{course.originalPrice}</span>
             {discount > 0 && (
-              <span className="ml-auto text-[0.66rem] font-bold px-2 py-0.5 rounded-md
+              <span className="ml-auto text-[0.6rem] font-bold px-1.5 py-0.5 rounded-md
                 bg-[var(--color-brand-dim)] text-[var(--color-brand)] border border-[var(--color-border-brand)]">
                 {discount}% off
               </span>
             )}
           </div>
-          <div className="flex gap-2">
-            <a href="#"
+          <div className="flex gap-1.5">
+            <Link href={`/courses/${course.slug}`}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-[10px] rounded-xl text-[0.82rem] font-semibold transition-all duration-200",
+                "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[0.76rem] font-semibold transition-all duration-200",
                 course.featured ? "btn btn-brand" : "btn btn-outline"
               )}>
-              {course.tag === "Coming Soon" ? "Join Waitlist" : "Enroll Now"} <ArrowRight size={14} />
-            </a>
-            <button className="w-[42px] h-[42px] rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)]
+              {course.tag === "Coming Soon" ? "Join Waitlist" : "View Course"} <ArrowRight size={12} />
+            </Link>
+            <button className="w-[36px] h-[36px] rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)]
               flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-brand)]
               hover:border-[var(--color-border-brand)] transition-all duration-200" aria-label="Preview course">
-              <Play size={14} />
+              <Play size={13} />
             </button>
           </div>
         </div>

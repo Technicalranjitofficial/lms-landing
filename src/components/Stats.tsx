@@ -38,7 +38,7 @@ export default function Stats() {
   const inView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
-    <section ref={ref} className="py-16 sm:py-20 relative">
+    <section ref={ref} className="py-10 sm:py-14 relative">
       <div className="divider-grad" />
       <div className="container relative z-10">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--color-border)] rounded-2xl overflow-hidden border border-[var(--color-border)]">
@@ -47,14 +47,14 @@ export default function Stats() {
               initial={{ opacity: 0 }}
               animate={inView ? { opacity: 1 } : {}}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="flex flex-col items-center text-center py-10 px-6
+              className="flex flex-col items-center text-center py-7 px-5
                 bg-[var(--color-surface)] hover:bg-[var(--color-surface-2)] transition-colors duration-300 relative overflow-hidden">
               {/* Top accent line per stat */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] w-[50%] rounded-b-full"
                 style={{ background: `linear-gradient(90deg, transparent, ${stat.color}, transparent)` }} />
               <div className="font-display font-black tracking-[-0.05em] mb-1"
                 style={{
-                  fontSize: "clamp(2.2rem,4vw,3rem)",
+                  fontSize: "clamp(1.8rem,3.5vw,2.5rem)",
                   color: stat.color,
                   fontFamily: "var(--font-display)",
                   fontVariantNumeric: "tabular-nums",
@@ -62,8 +62,8 @@ export default function Stats() {
                 <CountUp target={stat.value} start={inView} />
                 {stat.suffix}
               </div>
-              <p className="text-[0.88rem] font-semibold text-[var(--color-fg)] mb-1">{stat.label}</p>
-              <p className="text-[0.74rem] text-[var(--color-fg-muted)]">{stat.description}</p>
+              <p className="text-[0.8rem] font-semibold text-[var(--color-fg)] mb-0.5">{stat.label}</p>
+              <p className="text-[0.68rem] text-[var(--color-fg-muted)]">{stat.description}</p>
             </motion.div>
           ))}
         </div>

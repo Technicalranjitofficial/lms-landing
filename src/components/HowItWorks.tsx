@@ -40,7 +40,7 @@ export default function HowItWorks() {
       <div className="container relative z-10" ref={ref}>
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, ease: "easeOut" }} className="text-center mb-16">
+          transition={{ duration: 0.7, ease: "easeOut" }} className="text-center mb-10">
           <span className="section-label justify-center">
             {/* Cyan = learning journey */}
             <span className="w-5 h-px" style={{ background: "#22d3ee" }} />
@@ -72,7 +72,7 @@ export default function HowItWorks() {
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.65, delay: i * 0.12, ease: "easeOut" }}
                 whileHover={{ y: -6, transition: { type: "spring", stiffness: 300, damping: 24 } }}
-                className="card relative overflow-hidden flex flex-col p-7">
+                className="card relative overflow-hidden flex flex-col p-5">
 
                 {/* Subtle brand tint in corner */}
                 <div className="absolute top-0 left-0 w-[120px] h-[120px] pointer-events-none"
@@ -86,7 +86,7 @@ export default function HowItWorks() {
                 </div>
 
                 {/* Step number + icon row */}
-                <div className="flex items-center gap-4 mb-6 relative z-10">
+                <div className="flex items-center gap-3 mb-4 relative z-10">
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={inView ? { scale: 1, opacity: 1 } : {}}
@@ -108,9 +108,9 @@ export default function HowItWorks() {
                   </div>
                 </div>
 
-                <h3 className="font-display font-extrabold text-[1rem] text-[var(--color-fg)] mb-2 relative z-10"
+                <h3 className="font-display font-extrabold text-[0.92rem] text-[var(--color-fg)] mb-1.5 relative z-10"
                   style={{ fontFamily: "var(--font-display)" }}>{step.title}</h3>
-                <p className="text-[0.83rem] text-[var(--color-fg-muted)] leading-relaxed mb-4 relative z-10">
+                <p className="text-[0.78rem] text-[var(--color-fg-muted)] leading-relaxed mb-3 relative z-10">
                   {step.description}
                 </p>
 
@@ -127,7 +127,7 @@ export default function HowItWorks() {
         {/* CTA strip */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.7, duration: 0.65, ease: "easeOut" }}
-          className="card mt-12 flex flex-wrap items-center justify-between gap-5 px-8 py-7">
+          className="card mt-8 flex flex-wrap items-center justify-between gap-4 px-6 py-5">
           <div>
             <p className="font-display font-bold text-[1.1rem] text-[var(--color-fg)] mb-1"
               style={{ fontFamily: "var(--font-display)" }}>Ready to get started?</p>

@@ -87,13 +87,13 @@ export default function Navbar() {
             {/* Desktop only buttons - hidden on mobile/tablet */}
             <div className="hidden lg:flex items-center gap-2">
               <a
-                href="#courses"
+                href="/login"
                 className="btn btn-ghost text-[0.84rem] py-[9px] px-4 text-[var(--color-fg-muted)]"
               >
                 Log In
               </a>
               <a
-                href="#courses"
+                href="/courses"
                 className="btn btn-brand text-[0.84rem] py-[10px] px-5"
               >
                 Start Learning
@@ -162,14 +162,14 @@ export default function Navbar() {
 
           <div className="p-4 border-t border-[var(--color-border)] flex flex-col gap-2 pb-[calc(1rem+env(safe-area-inset-bottom))]">
             <a
-              href="#courses"
+              href="/login"
               onClick={() => setOpen(false)}
               className="btn btn-outline w-full justify-center text-[0.88rem] py-3"
             >
               Log In
             </a>
             <a
-              href="#courses"
+              href="/courses"
               onClick={() => setOpen(false)}
               className="btn btn-brand w-full justify-center text-[0.88rem] py-3"
             >
